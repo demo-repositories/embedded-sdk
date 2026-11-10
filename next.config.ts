@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  compiler: { styledComponents: true },
   cacheComponents: true,
   partialPrefetching: true,
   // Next dev refuses non-localhost hosts unless listed here. Needed for the

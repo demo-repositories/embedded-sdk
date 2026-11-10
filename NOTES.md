@@ -37,7 +37,9 @@ The authorize redirect is accepted by Sanity. Opening `http://localhost:3000` wi
 
 `/users/me` (API `2021-06-07`, `useProjectHostname: false`) returns both `id` and `sanityUserId`, and they are different. The session and the home page use `sanityUserId`. A token that cannot read project `sin73gke`, or that sees it under a different organization, gets the "Wrong organization" page and no session.
 
-The session cookie is `httpOnly` and `SameSite=Lax`. `Secure` is set outside development. The PKCE verifier lives in a separate 10-minute `httpOnly` cookie. Token rotation calls `setAuthToken` (`@internal`) on an interval, on focus, and when the dev-only "force token refresh" control asks the token route to refresh immediately. The dev-token route is still in place until a real sign-in is confirmed.
+The session cookie is `httpOnly` and `SameSite=Lax`. `Secure` is set outside development. The PKCE verifier lives in a separate 10-minute `httpOnly` cookie. Token rotation calls `setAuthToken` (`@internal`) on an interval, on focus, and when the dev-only "force token refresh" control asks the token route to refresh immediately.
+
+A save from the signed-in page is attributed to the person. Saves from `/dev` were attributed to the robot dev token (`"embedded-sdk localhost dev"`). That route has been removed. The token itself may still exist in the Sanity project until it is deleted there.
 
 ## Dev-server note
 

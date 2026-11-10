@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import ClientRoot from '@/components/ClientRoot'
 import ForceRefresh from '@/components/ForceRefresh'
 import ProofPanel from '@/components/ProofPanel'
@@ -37,6 +38,9 @@ export default async function Home() {
       <h1>Signed in</h1>
       <p>
         sanityUserId: <code>{sanityUserId}</code>
+      </p>
+      <p>
+        <Link href="/studio">Open Studio</Link>
       </p>
       <form action="/api/auth/sanity/logout" method="post">
         <button type="submit">Log out</button>

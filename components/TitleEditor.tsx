@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useDocument, useEditDocument } from '@sanity/sdk-react'
 
@@ -31,6 +32,11 @@ export default function TitleEditor({
         Title{' '}
         <input value={value} onChange={(e) => setDraft(e.target.value)} />
       </label>{' '}
+      <Link
+        href={`/studio/intent/edit/id=${encodeURIComponent(documentId)};type=${encodeURIComponent(documentType)}`}
+      >
+        Open in Studio
+      </Link>{' '}
       <button
         type="button"
         onClick={async () => {

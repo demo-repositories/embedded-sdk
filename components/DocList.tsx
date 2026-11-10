@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useQuery } from '@sanity/sdk-react'
 
 export interface DocRow {
@@ -24,7 +25,12 @@ export default function DocList({ onSelect }: { onSelect: (doc: DocRow) => void 
           <code>{doc._type}</code> {doc.title ?? <em>(no title)</em>}{' '}
           <button type="button" onClick={() => onSelect(doc)}>
             Edit title
-          </button>
+          </button>{' '}
+          <Link
+            href={`/studio/intent/edit/id=${encodeURIComponent(doc._id)};type=${encodeURIComponent(doc._type)}`}
+          >
+            Open in Studio
+          </Link>
         </li>
       ))}
     </ul>

@@ -9,7 +9,7 @@ function hasSessionCookie(request: NextRequest): boolean {
 
 /**
  * Optimistic gate only. Route handlers and the home page still check the session.
- * `/dev` and `/api/*` stay outside this matcher until the dev-token proof is removed.
+ * `/api/*` is excluded so the login and token routes can run without a session.
  */
 export function proxy(request: NextRequest) {
   if (hasSessionCookie(request)) return NextResponse.next()
@@ -20,5 +20,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|dev|.*\\..*).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 }
