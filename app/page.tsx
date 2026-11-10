@@ -1,11 +1,25 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import ClientRoot from '@/components/ClientRoot'
 import ForceRefresh from '@/components/ForceRefresh'
 import ProofPanel from '@/components/ProofPanel'
 import { fetchSanityUserId } from '@/lib/sanity-user'
 import { getSession, sessionIsComplete } from '@/lib/session'
 
-export default async function Home() {
+// With Cache Components, reading cookies() must happen behind a Suspense boundary.
+export default function Home() {
+  return (
+    <Suspense fallback={<main style={{ fontFamily: 'sans-serif', padding: '1.5rem' }}>Loading…</main>}>
+      <HomeContent />
+    </Suspense>
+  )
+}
+
+/**
+ * Reads the encrypted session cookie; with a valid session it renders the
+ * SDK-powered panel, which gets its access token from the token route.
+ */
+async function HomeContent() {
   const session = await getSession()
   if (!sessionIsComplete(session)) {
     return (

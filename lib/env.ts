@@ -1,3 +1,6 @@
+// Server-only configuration, validated once at startup. `server-only` makes the
+// build fail if a client component imports this, so these values (including the
+// OAuth client secret) never end up in the browser bundle.
 import 'server-only'
 
 function required(name: string): string {

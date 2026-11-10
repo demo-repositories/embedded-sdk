@@ -1,3 +1,17 @@
+/**
+ * Sanity OAuth, server side. This app is a confidential client using the
+ * authorization code flow with PKCE (S256):
+ *
+ * 1. `beginOauth` generates `state` and a PKCE verifier, seals them into a
+ *    short-lived cookie, and redirects the browser to Sanity's authorize URL.
+ * 2. Sanity sends the browser back to the callback route with `code` and `state`.
+ * 3. The callback checks `state`, then `exchangeCode` trades the code (plus the
+ *    verifier and the client secret) for an access token and a refresh token.
+ * 4. `refreshTokens` swaps the refresh token for new tokens before expiry.
+ *
+ * The client secret is only ever sent from this server to Sanity's token and
+ * revoke endpoints. It never reaches the browser.
+ */
 import 'server-only'
 
 import { timingSafeEqual } from 'node:crypto'
@@ -36,6 +50,10 @@ interface TokenEndpointResponse {
   refresh_token?: unknown
 }
 
+/**
+ * RFC 8707 resource indicator. Scopes the issued tokens to the organization
+ * that owns the project, and is sent on every authorize and token request.
+ */
 function resourceIndicator(): string {
   return `urn:io.sanity:organization:${SANITY_ORG_ID}`
 }
@@ -72,7 +90,10 @@ function sameString(a: string, b: string): boolean {
   return timingSafeEqual(left, right)
 }
 
-/** Only a same-origin path. Rejects protocol-relative and absolute URLs. */
+/**
+ * Only a same-origin path. Rejects protocol-relative and absolute URLs so the
+ * post-login redirect cannot be used as an open redirect.
+ */
 export function safeReturnTo(input: string | null): string {
   if (!input) return '/'
   if (!input.startsWith('/') || input.startsWith('//') || input.includes('\\')) return '/'
@@ -92,6 +113,11 @@ export function authorizeUrl(state: string, challenge: string): string {
   return url.toString()
 }
 
+/**
+ * `state` (CSRF protection), the PKCE verifier and `returnTo` are sealed with
+ * SESSION_SECRET into an httpOnly cookie, so the callback can verify them
+ * without any server-side storage. Only the derived challenge goes to Sanity.
+ */
 export async function beginOauth(returnTo: string): Promise<NextResponse> {
   const state = randomUrlSafe()
   const verifier = randomUrlSafe()
@@ -189,6 +215,10 @@ function confidentialParams(grant: Record<string, string>): URLSearchParams {
   })
 }
 
+/**
+ * A refresh response may omit `refresh_token`. In that case the previous one
+ * stays valid and is kept.
+ */
 function parseTokens(body: TokenEndpointResponse, previousRefreshToken?: string): OAuthTokens {
   const accessToken = body.access_token
   const expiresIn = body.expires_in
@@ -230,7 +260,10 @@ export async function refreshTokens(refreshToken: string): Promise<OAuthTokens> 
   return parseTokens(body, refreshToken)
 }
 
-/** Revoke failures are ignored. The platform cookie may outlive this call (ID-1107). */
+/**
+ * Revoke failures are ignored. Revoking the token does not necessarily end the
+ * user's sanity.io login session, so the next sign-in may skip the login screen.
+ */
 export async function revokeToken(token: string): Promise<void> {
   try {
     const response = await fetch(serverEnv.revokeUrl, {

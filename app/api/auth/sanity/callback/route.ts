@@ -11,6 +11,11 @@ import {
 import { assertProjectAccess, fetchSanityUserId, OrgMismatchError } from '@/lib/sanity-user'
 import { sessionOptions, type SessionData } from '@/lib/session'
 
+/**
+ * Sanity redirects here after sign-in. Verifies `state`, exchanges the code for
+ * tokens, checks the token belongs to the right organization, reads the user, and
+ * only then writes the session cookie. Any failure revokes the new tokens.
+ */
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams
   const oauthError = params.get('error')

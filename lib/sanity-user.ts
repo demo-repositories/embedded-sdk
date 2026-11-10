@@ -16,7 +16,11 @@ function statusOf(error: unknown): number | 'network' {
   return error instanceof ClientError ? error.statusCode : 'network'
 }
 
-/** Confirms the token can see this project and that the project belongs to the expected org. */
+/**
+ * Confirms the token can see this project and that the project belongs to the expected org.
+ * Users who belong to several organizations pick one on the Sanity login screen; a token
+ * issued for the wrong one cannot use this project, so the callback rejects it early.
+ */
 export async function assertProjectAccess(token: string): Promise<void> {
   const client = createClient({
     apiVersion: '2025-02-19',
@@ -38,8 +42,10 @@ export async function assertProjectAccess(token: string): Promise<void> {
 }
 
 /**
- * Reads `/users/me` on the global API. The account id and the project user id
- * are different fields; this returns `sanityUserId` only.
+ * Reads `/users/me` on the global API. The account id (`id`) and the user id that
+ * documents and history refer to (`sanityUserId`) are different fields; this
+ * returns `sanityUserId` only. Runs on the server because the global API does not
+ * honor the project's CORS origins.
  */
 export async function fetchSanityUserId(token: string): Promise<string> {
   const client = createClient({

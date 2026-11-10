@@ -8,7 +8,11 @@ function hasSessionCookie(request: NextRequest): boolean {
 }
 
 /**
- * Optimistic gate only. Route handlers and the home page still check the session.
+ * Next 16 Proxy (formerly Middleware). Runs before matched pages and redirects
+ * visitors without a session cookie to the login route.
+ *
+ * Optimistic gate only: it checks that the cookie exists, not that it decrypts or
+ * holds valid tokens. Route handlers and the home page still check the session.
  * `/api/*` is excluded so the login and token routes can run without a session.
  */
 export function proxy(request: NextRequest) {

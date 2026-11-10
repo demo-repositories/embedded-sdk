@@ -9,6 +9,11 @@ function unauthorized() {
   return NextResponse.json({ error: 'unauthorized' }, { status: 401, headers: noStore })
 }
 
+/**
+ * The browser's only way to get an access token. Returns the current token from
+ * the session, refreshing it first once it is inside the refresh window
+ * (SANITY_TOKEN_REFRESH_WINDOW_SECONDS before expiry).
+ */
 export async function GET(request: NextRequest) {
   const session = await getSession()
   if (!sessionIsComplete(session)) return unauthorized()
@@ -27,6 +32,9 @@ export async function GET(request: NextRequest) {
       session.expiresAt = next.expiresAt
       await session.save()
     } catch (error) {
+      // A 4xx (other than timeout or rate limit) means the refresh token is no longer
+      // valid, so the session is dropped and the client sends the user to sign in.
+      // Network errors and 5xx are treated as temporary and keep the session.
       const status = error instanceof OAuthRequestError ? error.status : 0
       const unrecoverable = status >= 400 && status < 500 && status !== 408 && status !== 429
       if (unrecoverable) {

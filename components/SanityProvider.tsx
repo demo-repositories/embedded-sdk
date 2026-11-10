@@ -5,6 +5,19 @@ import { SDKProvider, useSanityInstance } from '@sanity/sdk-react'
 import { setAuthToken } from '@sanity/sdk'
 import { SANITY_DATASET, SANITY_PROJECT_ID } from '@/lib/public-env'
 
+/*
+ * Bridges the server-side OAuth session to the Sanity App SDK.
+ *
+ * The browser never sees the refresh token or the client secret. It fetches a
+ * short-lived access token from the token route, starts `SDKProvider` with it,
+ * and then (when `rotate` is on) re-fetches it every few minutes, on window
+ * focus, and on the `sanity-token-refresh` event, handing any new token to the
+ * SDK with `setAuthToken`. A 401 from the token route sends the user to sign in.
+ *
+ * `SDKProvider` and `setAuthToken` are marked `@internal` in @sanity/sdk 3.12,
+ * so they may change between SDK releases.
+ */
+
 export interface SanityProviderProps {
   /** Endpoint returning `{ accessToken, expiresAt }`. */
   tokenUrl: string

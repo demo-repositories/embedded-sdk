@@ -5,6 +5,11 @@ import { cookies } from 'next/headers'
 import { SESSION_COOKIE_NAME } from '@/lib/cookie-names'
 import { serverEnv } from '@/lib/env'
 
+/**
+ * The session lives entirely in an encrypted iron-session cookie, sealed with
+ * SESSION_SECRET. There is no server-side session store. The tokens are only
+ * readable on the server; the browser gets the access token via the token route.
+ */
 export interface SessionData {
   accessToken: string
   refreshToken: string
